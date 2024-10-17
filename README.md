@@ -11,3 +11,4 @@ B - Turn on the mode when the distance to which we move the vertex with the left
 Ctrl + S - Save the graph.
 Ctrl + O - Open the graph file.
 When the erase function is enabled, left-clicking on the field while pressing Shift simultaneously deletes the entire graph on the field.
+F11 - Fullscreen.
