@@ -944,7 +944,8 @@ void CSamField::mousePressEvent(QMouseEvent *event) {
                     auto iter = std::find_if(graph.self_arrs.begin(), graph.self_arrs.end(), [&](const SelfEdge& edg){ return graph.txts[txt.second].binding == edg.idx; });
                     graph.self_arrs.removeAt(std::distance(graph.self_arrs.begin(), iter));
                 }
-                graph.txts.removeAt(txt.second);
+                if (!((graph.txts[txt.second].type == TypeEdge::NONE) && (graph.txts[txt.second].binding != -1)))
+                    graph.txts.removeAt(txt.second);
 
             }
         }
