@@ -23,6 +23,7 @@ public:
 };
 
 QVector<int> fromIntJsonToVector(QJsonArray arr);
+QVector<double> fromDoubleJsonToVector(QJsonArray arr);
 QVector<bool> fromBoolJsonToVector(QJsonArray arr);
 QVector<TypeEdge> fromEnumJsonToVector(QJsonArray arr);
 QVector<QString> fromStringJsonToVector(QJsonArray arr);

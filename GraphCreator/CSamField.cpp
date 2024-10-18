@@ -19,7 +19,7 @@ CSamField::CSamField(QWidget *parent) : QWidget{parent}, graph(SamGraph()) {
     txtInWriting = nullptr;
     gridBinding = false;
 
-    mouseTracker = QPoint(0, 0);
+    mouseTracker = QPointF(0, 0);
 
     setCursor(Qt::CrossCursor);
 
@@ -270,17 +270,16 @@ void CSamField::drawSelected(QPainter* painter) {
         painter->drawLine(correctedEnd, arrowP1);
         painter->drawLine(correctedEnd, arrowP2);
     }
-
     // Рёбра в ту же вершину
     for (int i = 0; i < (int)selectedSelfEdges.size(); i++) {
-        painter->drawEllipse(QRect(getPlace(QPoint(graph.verxs[selectedSelfEdges[i]->verIdx].coords.x()
+        painter->drawEllipse(QRect((getPlace(QPointF(graph.verxs[selectedSelfEdges[i]->verIdx].coords.x()
                                                        - graph.verxs[selectedSelfEdges[i]->verIdx].radius / 2,
                                                    graph.verxs[selectedSelfEdges[i]->verIdx].coords.y()
-                                                       - graph.verxs[selectedSelfEdges[i]->verIdx].radius / 2)) / scale,
-                                   getPlace(QPoint(graph.verxs[selectedSelfEdges[i]->verIdx].coords.x()
+                                                       - graph.verxs[selectedSelfEdges[i]->verIdx].radius / 2)) / scale).toPoint(),
+                                   (getPlace(QPointF(graph.verxs[selectedSelfEdges[i]->verIdx].coords.x()
                                                        + graph.verxs[selectedSelfEdges[i]->verIdx].radius / 2,
                                                    graph.verxs[selectedSelfEdges[i]->verIdx].coords.y()
-                                                       - graph.verxs[selectedSelfEdges[i]->verIdx].radius * 2)) / scale));
+                                                       - graph.verxs[selectedSelfEdges[i]->verIdx].radius * 2)) / scale).toPoint()));
     }
 
     if (selectedVrxs.empty()) {
@@ -304,7 +303,7 @@ void CSamField::drawSelected(QPainter* painter) {
         for (int i = 0; i < (int)verxs_self_sels.size(); i++) {
             auto iter = std::find_if(graph.txts.begin(), graph.txts.end(), [&](const Text& txt)
                                      { return (txt.idx == verxs_self_sels[i]->textBinding) && txt.notLine; });
-            QPoint textPos = getPlace(iter->coords + verxs_self_sels[i]->coords) / scale;
+            QPointF textPos = getPlace(iter->coords + verxs_self_sels[i]->coords) / scale;
 
             QRect boundingRect = fm.boundingRect(textPos.x(), textPos.y() - 10, 0, 0, Qt::AlignLeft, iter->text);
             boundingRect.translate(-boundingRect.width() / 2, 0);
@@ -314,7 +313,7 @@ void CSamField::drawSelected(QPainter* painter) {
                 painter->drawRect(boundingRect);
             }
 
-            painter->drawText(textPos - QPoint(boundingRect.width() / 2, 0), iter->text);
+            painter->drawText(textPos - QPointF(boundingRect.width() / 2, 0), iter->text);
         }
         pen.setColor(QColor(60, 120, 60));
         pen.setWidth(2);
@@ -324,7 +323,7 @@ void CSamField::drawSelected(QPainter* painter) {
     // Вершины
     painter->setBrush(QColor(255, 255, 255));
     for (int i = 0; i < (int)selectedVrxs.size(); i++) {
-        QPoint place = this->getPlace(selectedVrxs[i]->coords) / scale;
+        QPointF place = this->getPlace(selectedVrxs[i]->coords) / scale;
         int radius = static_cast<int>(selectedVrxs[i]->radius) / scale;
         painter->drawEllipse(place, radius, radius);
     }
@@ -336,7 +335,7 @@ void CSamField::drawSelected(QPainter* painter) {
     for (int i = 0; i < (int)selectedTxts.size(); i++) {
         if (selectedTxts[i]->notLine) {
             auto iter = std::find_if(graph.verxs.begin(), graph.verxs.end(), [&](const Vertex& vrx){ return (vrx.idx == selectedTxts[i]->binding) && selectedTxts[i]->notLine; });
-            QPoint textPos = selectedTxts[i]->binding != -1 ?
+            QPointF textPos = selectedTxts[i]->binding != -1 ?
                                  getPlace(selectedTxts[i]->coords + graph.verxs[std::distance(graph.verxs.begin(), iter)].coords) / scale
                                                          : getPlace(selectedTxts[i]->coords) / scale;
 
@@ -352,7 +351,7 @@ void CSamField::drawSelected(QPainter* painter) {
         }
         else if (selectedTxts[i]->type == TypeEdge::EDGE) {
             auto iter = std::find_if(graph.edgs.begin(), graph.edgs.end(), [&](const Edge& edg){ return (edg.idx == selectedTxts[i]->binding); });
-            QPoint textPos = selectedTxts[i]->coords / scale + (getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].firstIdx].coords)
+            QPointF textPos = selectedTxts[i]->coords / scale + (getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].firstIdx].coords)
                                                              + getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].secondIdx].coords)) / scale / 2;
 
 
@@ -368,7 +367,7 @@ void CSamField::drawSelected(QPainter* painter) {
         }
         else if (selectedTxts[i]->type == TypeEdge::ARROW) {
             auto iter = std::find_if(graph.arrs.begin(), graph.arrs.end(), [&](const Edge& edg){ return (edg.idx == selectedTxts[i]->binding); });
-            QPoint textPos = selectedTxts[i]->coords / scale + (getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].firstIdx].coords)
+            QPointF textPos = selectedTxts[i]->coords / scale + (getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].firstIdx].coords)
                                                              + getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].secondIdx].coords)) / scale / 2;
 
 
@@ -384,7 +383,7 @@ void CSamField::drawSelected(QPainter* painter) {
         }
         else if (selectedTxts[i]->type == TypeEdge::SELF_ARROW) {
             auto iter = std::find_if(graph.self_arrs.begin(), graph.self_arrs.end(), [&](const SelfEdge& edg){ return (edg.idx == selectedTxts[i]->binding); });
-            QPoint textPos = selectedTxts[i]->coords / scale + (getPlace(graph.verxs[graph.self_arrs[std::distance(graph.self_arrs.begin(), iter)].verIdx].coords)
+            QPointF textPos = selectedTxts[i]->coords / scale + (getPlace(graph.verxs[graph.self_arrs[std::distance(graph.self_arrs.begin(), iter)].verIdx].coords)
                                                                 + getPlace(graph.verxs[graph.self_arrs[std::distance(graph.self_arrs.begin(), iter)].verIdx].coords)) / scale / 2;
 
 
@@ -425,7 +424,7 @@ void CSamField::drawTxts(QPainter* painter) {
     for (int i = 0; i < (int)graph.txts.size(); i++) {
         if (graph.txts[i].notLine) {
             auto iter = std::find_if(graph.verxs.begin(), graph.verxs.end(), [&](const Vertex& vrx){ return (vrx.idx == graph.txts[i].binding) && graph.txts[i].notLine; });
-            QPoint textPos = graph.txts[i].binding != -1 ?
+            QPointF textPos = graph.txts[i].binding != -1 ?
                                  getPlace(graph.txts[i].coords + graph.verxs[std::distance(graph.verxs.begin(), iter)].coords) / scale
                                                          : getPlace(graph.txts[i].coords) / scale;
 
@@ -441,7 +440,7 @@ void CSamField::drawTxts(QPainter* painter) {
         }
         else if (graph.txts[i].type == TypeEdge::EDGE) {
             auto iter = std::find_if(graph.edgs.begin(), graph.edgs.end(), [&](const Edge& edg){ return (edg.idx == graph.txts[i].binding); });
-            QPoint textPos = graph.txts[i].coords / scale + (getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].firstIdx].coords)
+            QPointF textPos = graph.txts[i].coords / scale + (getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].firstIdx].coords)
                                                                + getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].secondIdx].coords)) / scale / 2;
 
 
@@ -459,7 +458,7 @@ void CSamField::drawTxts(QPainter* painter) {
         }
         else if (graph.txts[i].type == TypeEdge::ARROW) {
             auto iter = std::find_if(graph.arrs.begin(), graph.arrs.end(), [&](const Edge& edg){ return (edg.idx == graph.txts[i].binding); });
-            QPoint textPos = graph.txts[i].coords / scale + (getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].firstIdx].coords)
+            QPointF textPos = graph.txts[i].coords / scale + (getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].firstIdx].coords)
                                                              + getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].secondIdx].coords)) / scale / 2;
 
 
@@ -477,7 +476,7 @@ void CSamField::drawTxts(QPainter* painter) {
         }
         else if (graph.txts[i].type == TypeEdge::SELF_ARROW) {
             auto iter = std::find_if(graph.self_arrs.begin(), graph.self_arrs.end(), [&](const SelfEdge& edg){ return (edg.idx == graph.txts[i].binding); });
-            QPoint textPos = graph.txts[i].coords / scale + (getPlace(graph.verxs[graph.self_arrs[std::distance(graph.self_arrs.begin(), iter)].verIdx].coords)) / scale;
+            QPointF textPos = graph.txts[i].coords / scale + (getPlace(graph.verxs[graph.self_arrs[std::distance(graph.self_arrs.begin(), iter)].verIdx].coords)) / scale;
 
 
             QRect boundingRect = fm.boundingRect(textPos.x(), textPos.y() - 10, 0, 0, Qt::AlignLeft, graph.txts[i].text);
@@ -559,14 +558,14 @@ void CSamField::drawSelfArrows(QPainter* painter) {
     painter->setBrush(Qt::NoBrush);
 
     for (int i = 0; i < (int)graph.self_arrs.size(); i++) {
-        painter->drawEllipse(QRect(getPlace(QPoint(graph.verxs[graph.self_arrs[i].verIdx].coords.x()
+        painter->drawEllipse(QRect((getPlace(QPoint(graph.verxs[graph.self_arrs[i].verIdx].coords.x()
                                                        - graph.verxs[graph.self_arrs[i].verIdx].radius / 2,
                                                    graph.verxs[graph.self_arrs[i].verIdx].coords.y()
-                                                       - graph.verxs[graph.self_arrs[i].verIdx].radius / 2)) / scale,
-                                   getPlace(QPoint(graph.verxs[graph.self_arrs[i].verIdx].coords.x()
+                                                        - graph.verxs[graph.self_arrs[i].verIdx].radius / 2)) / scale).toPoint(),
+                                   (getPlace(QPoint(graph.verxs[graph.self_arrs[i].verIdx].coords.x()
                                                        + graph.verxs[graph.self_arrs[i].verIdx].radius / 2,
                                                    graph.verxs[graph.self_arrs[i].verIdx].coords.y()
-                                                       - graph.verxs[graph.self_arrs[i].verIdx].radius * 2)) / scale));
+                                                       - graph.verxs[graph.self_arrs[i].verIdx].radius * 2)) / scale).toPoint()));
     }
 }
 
@@ -579,7 +578,7 @@ void CSamField::drawVrxs(QPainter* painter) {
 
 
     for (int i = 0; i < (int)graph.verxs.size(); i++) {
-        QPoint place = this->getPlace(graph.verxs[i].coords) / scale;
+        QPointF place = this->getPlace(graph.verxs[i].coords) / scale;
         int radius = static_cast<int>(graph.verxs[i].radius) / scale;
         painter->drawEllipse(place, radius, radius);
     }
@@ -598,16 +597,16 @@ void CSamField::drawGrid(QPainter* painter) const {
     int numRows = height() / 30 * scale;
 
     for (int i = 0; i < numCols + 4; i++) {
-        int x = (30 * i + coords.x() % 30) / scale;
+        int x = (30 * i + (int)round(coords.x()) % 30) / scale;
         painter->drawLine(x, 0, x, height());
     }
     for (int i = 0; i < numRows + 3; i++) {
-        int y = (30 * i + coords.y() % 30) / scale;
+        int y = (30 * i + (int)round(coords.y()) % 30) / scale;
         painter->drawLine(0, y, width(), y);
     }
 }
 
-QPair<Vertex*, int> CSamField::getVertex(QPoint pos) {
+QPair<Vertex*, int> CSamField::getVertex(QPointF pos) {
     for (int i = 0; i < (int)graph.verxs.size(); i++) {
         if (sqrt(pow(pos.x() * scale - coords.x() - graph.verxs[i].coords.x(), 2) + pow(pos.y() * scale - coords.y() - graph.verxs[i].coords.y(), 2)) < graph.verxs[i].radius) {
             return qMakePair(&graph.verxs[i], i);
@@ -616,7 +615,7 @@ QPair<Vertex*, int> CSamField::getVertex(QPoint pos) {
     return qMakePair(nullptr, -1);
 }
 
-QPair<Text*, int> CSamField::getText(QPoint pos) {
+QPair<Text*, int> CSamField::getText(QPointF pos) {
     QFontMetrics fm(QApplication::font());
 
     for (int i = 0; i < (int)graph.txts.size(); i++) {
@@ -624,7 +623,7 @@ QPair<Text*, int> CSamField::getText(QPoint pos) {
 
             auto iter = std::find_if(graph.verxs.begin(), graph.verxs.end(), [&](const Vertex& vrx){ return (vrx.idx == graph.txts[i].binding) && graph.txts[i].notLine; });
 
-            QPoint textPos = graph.txts[i].binding != -1 ?
+            QPointF textPos = graph.txts[i].binding != -1 ?
                                  getPlace(graph.txts[i].coords + graph.verxs[std::distance(graph.verxs.begin(), iter)].coords) / scale
                                                          : getPlace(graph.txts[i].coords) / scale;
 
@@ -635,14 +634,14 @@ QPair<Text*, int> CSamField::getText(QPoint pos) {
 
             expandRect(boundingRect, scale);
 
-            if (boundingRect.contains(pos * scale)) {
+            if (boundingRect.contains((pos * scale).toPoint())) {
                 return qMakePair(&graph.txts[i], i);
             }
         }
         else {
             if (graph.txts[i].type == TypeEdge::EDGE) {
                 auto iter = std::find_if(graph.edgs.begin(), graph.edgs.end(), [&](const Edge& edg) { return (edg.idx == graph.txts[i].binding); });
-                QPoint textPos = graph.txts[i].coords + (getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].firstIdx].coords)
+                QPointF textPos = graph.txts[i].coords + (getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].firstIdx].coords)
                                   + getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].secondIdx].coords)) / 2;
 
                 textPos /= scale;
@@ -653,13 +652,13 @@ QPair<Text*, int> CSamField::getText(QPoint pos) {
 
                 expandRect(boundingRect, scale);
 
-                if (boundingRect.contains(pos)) {
+                if (boundingRect.contains(pos.toPoint())) {
                     return qMakePair(&graph.txts[i], i);
                 }
             }
             else if (graph.txts[i].type == TypeEdge::ARROW) {
                 auto iter = std::find_if(graph.arrs.begin(), graph.arrs.end(), [&](const Edge& arr){ return (arr.idx == graph.txts[i].binding) && (graph.txts[i].type == TypeEdge::ARROW); });
-                QPoint textPos = graph.txts[i].coords + (getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].firstIdx].coords)
+                QPointF textPos = graph.txts[i].coords + (getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].firstIdx].coords)
                                                                    + getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].secondIdx].coords)) / 2;
 
                 textPos /= scale;
@@ -670,13 +669,13 @@ QPair<Text*, int> CSamField::getText(QPoint pos) {
 
                 expandRect(boundingRect, scale);
 
-                if (boundingRect.contains(pos)) {
+                if (boundingRect.contains(pos.toPoint())) {
                     return qMakePair(&graph.txts[i], i);
                 }
             }
             else if (graph.txts[i].type == TypeEdge::SELF_ARROW) {
                 auto iter = std::find_if(graph.self_arrs.begin(), graph.self_arrs.end(), [&](const SelfEdge& arr){ return (arr.idx == graph.txts[i].binding) && (graph.txts[i].type == TypeEdge::SELF_ARROW); });
-                QPoint textPos = graph.txts[i].coords + (getPlace(graph.verxs[graph.self_arrs[std::distance(graph.self_arrs.begin(), iter)].verIdx].coords));
+                QPointF textPos = graph.txts[i].coords + (getPlace(graph.verxs[graph.self_arrs[std::distance(graph.self_arrs.begin(), iter)].verIdx].coords));
 
                 textPos /= scale;
 
@@ -686,7 +685,7 @@ QPair<Text*, int> CSamField::getText(QPoint pos) {
 
                 expandRect(boundingRect, scale);
 
-                if (boundingRect.contains(pos)) {
+                if (boundingRect.contains(pos.toPoint())) {
                     return qMakePair(&graph.txts[i], i);
                 }
             }
@@ -756,7 +755,7 @@ void CSamField::mousePressEvent(QMouseEvent *event) {
         if (option == Option::VERTEX) {
             if (this->getVertex(event->pos()).first == nullptr) {
                 graph.verxs.push_back(Vertex((event->pos() * scale - coords), 20, graph.numVerxs));
-                graph.txts.push_back(Text(QString::number(graph.numVerxs++ + 1), QPoint(0, 0), graph.numTexts++, true, graph.verxs[graph.verxs.size() - 1].idx));
+                graph.txts.push_back(Text(QString::number(graph.numVerxs++ + 1), QPoint(0, 3), graph.numTexts++, true, graph.verxs[graph.verxs.size() - 1].idx));
                 graph.verxs.back().setText(graph.txts.back().idx);
             }
         }
@@ -780,10 +779,17 @@ void CSamField::mousePressEvent(QMouseEvent *event) {
                 }
 
                 if (ver1 == ver2) {
-                    graph.self_arrs.push_back(SelfEdge(ver1, graph.numSelfArrs));
-                    graph.txts.push_back(Text("   ", QPoint(0, -graph.verxs[ver1].radius * 2.1), graph.numTexts++,
-                                              false, graph.numSelfArrs++, TypeEdge::SELF_ARROW));
-                    graph.self_arrs.back().setText(graph.txts.back().idx);
+                    bool addIt = true;
+                    for (int i = 0; i < graph.self_arrs.size(); i++) {
+                        if (graph.self_arrs[i].verIdx == ver1)
+                            addIt = false;
+                    }
+                    if (addIt) {
+                        graph.self_arrs.push_back(SelfEdge(ver1, graph.numSelfArrs));
+                        graph.txts.push_back(Text("   ", QPoint(0, -graph.verxs[ver1].radius * 2.1), graph.numTexts++,
+                                                  false, graph.numSelfArrs++, TypeEdge::SELF_ARROW));
+                        graph.self_arrs.back().setText(graph.txts.back().idx);
+                    }
                 }
                 else if (addIt) {
                     graph.edgs.push_back(Edge(ver1, ver2, graph.numEdgs));
@@ -816,10 +822,17 @@ void CSamField::mousePressEvent(QMouseEvent *event) {
                 }
 
                 if (ver1 == ver2) {
-                    graph.self_arrs.push_back(SelfEdge(ver1, graph.numSelfArrs));
-                    graph.txts.push_back(Text("   ", QPoint(0, -graph.verxs[ver1].radius * 2.1), graph.numTexts++,
-                                              false, graph.numSelfArrs++, TypeEdge::SELF_ARROW));
-                    graph.self_arrs.back().setText(graph.txts.back().idx);
+                    bool addIt = true;
+                    for (int i = 0; i < graph.self_arrs.size(); i++) {
+                        if (graph.self_arrs[i].verIdx == ver1)
+                            addIt = false;
+                    }
+                    if (addIt) {
+                        graph.self_arrs.push_back(SelfEdge(ver1, graph.numSelfArrs));
+                        graph.txts.push_back(Text("   ", QPoint(0, -graph.verxs[ver1].radius * 2.1), graph.numTexts++,
+                                                  false, graph.numSelfArrs++, TypeEdge::SELF_ARROW));
+                        graph.self_arrs.back().setText(graph.txts.back().idx);
+                    }
                 }
                 else if (addIt) {
                     graph.arrs.push_back(Edge(ver1, ver2, graph.numArrs));
@@ -843,8 +856,8 @@ void CSamField::mousePressEvent(QMouseEvent *event) {
                 verToMove = getVertex(event->pos()).second;
                 selectVrx(verToMove);
                 if (gridBinding) {
-                    graph.verxs[verToMove].coords = QPoint(graph.verxs[verToMove].coords.x() - graph.verxs[verToMove].coords.x() % 5,
-                                                           graph.verxs[verToMove].coords.y() - graph.verxs[verToMove].coords.y() % 5);
+                    graph.verxs[verToMove].coords = QPointF(substraD(graph.verxs[verToMove].coords.x() - graph.verxs[verToMove].coords.x(), 5),
+                                                            substraD(graph.verxs[verToMove].coords.y() - graph.verxs[verToMove].coords.y(), 5));
                 }
             }
         }
@@ -940,6 +953,11 @@ void CSamField::mousePressEvent(QMouseEvent *event) {
     QWidget::mousePressEvent(event);
 }
 
+double substraD(double i, int j) {
+    int sub = (int)floor(i);
+    return sub % j + i - (double)j;
+}
+
 void CSamField::mouseReleaseEvent(QMouseEvent *event){
     if(event->button() == Qt::RightButton){
         rightButtonPressed = false;
@@ -950,28 +968,28 @@ void CSamField::mouseReleaseEvent(QMouseEvent *event){
 void CSamField::mouseMoveEvent(QMouseEvent *event) {
     mouseTracker = event->pos();
     if (rightButtonPressed) {
-        QPoint delta = (event->pos() - oldCoords);
+        QPointF delta = (event->pos() - oldCoords);
         coords += delta * scale;
         oldCoords = event->pos();
     }
     else if (option == Option::CURSOR && verToMove != -1) {
-        QPoint delta = event->pos() * scale - graph.verxs[verToMove].coords - coords;
+        QPointF delta = event->pos() * scale - graph.verxs[verToMove].coords - coords;
         graph.verxs[verToMove].coords += delta;
         oldCoords = event->pos();
         if (gridBinding) {
-            graph.verxs[verToMove].coords = QPoint(graph.verxs[verToMove].coords.x() - graph.verxs[verToMove].coords.x() % 20,
-                                                   graph.verxs[verToMove].coords.y() - graph.verxs[verToMove].coords.y() % 20);
+            graph.verxs[verToMove].coords = QPointF(substraD(graph.verxs[verToMove].coords.x() - graph.verxs[verToMove].coords.x(), 20),
+                                                    substraD(graph.verxs[verToMove].coords.y() - graph.verxs[verToMove].coords.y(), 20));
         }
     }
     else if (option == Option::TEXT && txtToMove != -1) {
         // Текущая позиция курсора в координатах виджета
-        QPoint cursorPosInWidget = event->pos();
+        QPointF cursorPosInWidget = event->pos();
 
         // Вычисляем смещение текста
         if (graph.txts[txtToMove].type == TypeEdge::NONE) {
             auto iter = std::find_if(graph.verxs.begin(), graph.verxs.end(), [&](const Vertex& vrx){ return (graph.txts[txtToMove].binding == vrx.idx) && graph.txts[txtToMove].notLine; });
 
-            QPoint delta;
+            QPointF delta;
             graph.txts[txtToMove].binding != -1 ? delta = cursorPosInWidget * scale - coords - graph.txts[txtToMove].coords
                                                         - graph.verxs[std::distance(graph.verxs.begin(), iter)].coords
                                                         : delta = cursorPosInWidget * scale - coords - graph.txts[txtToMove].coords;
@@ -982,7 +1000,7 @@ void CSamField::mouseMoveEvent(QMouseEvent *event) {
         else if (graph.txts[txtToMove].type == TypeEdge::EDGE) {
             auto iter = std::find_if(graph.edgs.begin(), graph.edgs.end(), [&](const Edge& edg){ return (graph.txts[txtToMove].binding == edg.idx); });
 
-            QPoint delta = cursorPosInWidget * scale - graph.txts[txtToMove].coords -
+            QPointF delta = cursorPosInWidget * scale - graph.txts[txtToMove].coords -
                 (getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].firstIdx].coords)
                 + getPlace(graph.verxs[graph.edgs[std::distance(graph.edgs.begin(), iter)].secondIdx].coords)) / 2;
 
@@ -992,7 +1010,7 @@ void CSamField::mouseMoveEvent(QMouseEvent *event) {
         else if (graph.txts[txtToMove].type == TypeEdge::ARROW) {
             auto iter = std::find_if(graph.arrs.begin(), graph.arrs.end(), [&](const Edge& arr){ return (graph.txts[txtToMove].binding == arr.idx); });
 
-            QPoint delta = cursorPosInWidget * scale - graph.txts[txtToMove].coords -
+            QPointF delta = cursorPosInWidget * scale - graph.txts[txtToMove].coords -
                     (getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].firstIdx].coords)
                      + getPlace(graph.verxs[graph.arrs[std::distance(graph.arrs.begin(), iter)].secondIdx].coords)) / 2;
 
@@ -1002,7 +1020,7 @@ void CSamField::mouseMoveEvent(QMouseEvent *event) {
         else if (graph.txts[txtToMove].type == TypeEdge::SELF_ARROW) {
             auto iter = std::find_if(graph.self_arrs.begin(), graph.self_arrs.end(), [&](const SelfEdge& arr){ return (graph.txts[txtToMove].binding == arr.idx);});
 
-            QPoint delta = cursorPosInWidget * scale - graph.txts[txtToMove].coords -
+            QPointF delta = cursorPosInWidget * scale - graph.txts[txtToMove].coords -
                            (getPlace(graph.verxs[graph.self_arrs[std::distance(graph.self_arrs.begin(), iter)].verIdx].coords));
 
             // Перемещаем текст
@@ -1041,7 +1059,7 @@ Option CSamField::getOption() const {
     return option;
 }
 
-QPoint CSamField::getPlace(QPoint firstCoords) const {
+QPointF CSamField::getPlace(QPointF firstCoords) const {
     return firstCoords + coords;
 }
 
@@ -1064,11 +1082,11 @@ double CSamField::getScale() const {
     return this->scale;
 }
 
-QPoint CSamField::getCoords() const {
+QPointF CSamField::getCoords() const {
     return this->coords;
 }
 
-void CSamField::setCoords(QPoint coords) {
+void CSamField::setCoords(QPointF coords) {
     this->coords = coords;
 }
 

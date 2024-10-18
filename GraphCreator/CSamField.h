@@ -30,13 +30,13 @@ class CSamField : public QWidget {
     double scale;
     bool rightButtonPressed;
     bool leftButtonPressed;
-    QPoint coords;
-    QPoint oldCoords;
+    QPointF coords;
+    QPointF oldCoords;
     Option option;
     SamGraph graph;
     int ver1;
     int ver2;
-    QPoint mouseTracker;
+    QPointF mouseTracker;
     int verToMove;
     int txtToMove;
     bool ShiftOn;
@@ -65,21 +65,22 @@ public:
     void unselectAll();
     void changeOption(Option opt);
     Option getOption() const;
-    QPoint getPlace(QPoint firstCoords) const;
-    QPair<Vertex*, int> getVertex(QPoint pos);
-    QPair<Text*, int> getText(QPoint pos);
+    QPointF getPlace(QPointF firstCoords) const;
+    QPair<Vertex*, int> getVertex(QPointF pos);
+    QPair<Text*, int> getText(QPointF pos);
     void resetVers();
     explicit CSamField(QWidget *parent = nullptr);
     void setGraph(const SamGraph& graph);
     SamGraph getGraph() const;
     double getScale() const;
     void setScale(double scale);
-    void setCoords(QPoint coords);
-    QPoint getCoords() const;
+    void setCoords(QPointF coords);
+    QPointF getCoords() const;
     void resetOptions();
     void resetWriting();
 };
 
+double substraD(double i, int j);
 void expandRect(QRect& rect, float factor);
 
 #endif // CSAMFIELD_H

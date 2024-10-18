@@ -202,31 +202,31 @@ void CSamFrame::openFile() {
                 graph.numSelfArrs = jsonObj["numSelfArrs"].toInt();
             }
             else stop = true;
-            QPoint newCoords(0, 0);
+            QPointF newCoords(0, 0);
             if (jsonObj.contains("coords_x")) {
-                newCoords.setX(jsonObj["coords_x"].toInt());
+                newCoords.setX(jsonObj["coords_x"].toDouble());
             }
             else stop = true;
             if (jsonObj.contains("coords_y")) {
-                newCoords.setY(jsonObj["coords_y"].toInt());
+                newCoords.setY(jsonObj["coords_y"].toDouble());
             }
             else stop = true;
 
             // Вершины
-            QVector<int> verxs_coords_x;
-            QVector<int> verxs_coords_y;
+            QVector<double> verxs_coords_x;
+            QVector<double> verxs_coords_y;
             if (jsonObj.contains("verxs_coords_x")) {
-                verxs_coords_x = fromIntJsonToVector(jsonObj["verxs_coords_x"].toArray());
+                verxs_coords_x = fromDoubleJsonToVector(jsonObj["verxs_coords_x"].toArray());
             }
             else stop = true;
             if (jsonObj.contains("verxs_coords_y")) {
-                verxs_coords_y = fromIntJsonToVector(jsonObj["verxs_coords_y"].toArray());
+                verxs_coords_y = fromDoubleJsonToVector(jsonObj["verxs_coords_y"].toArray());
             }
             else stop = true;
 
-            QVector<QPoint> verxs_coords;
+            QVector<QPointF> verxs_coords;
             for (int i = 0; i < (int)verxs_coords_x.size(); i++) {
-                verxs_coords.push_back(QPoint(verxs_coords_x[i], verxs_coords_y[i]));
+                verxs_coords.push_back(QPointF(verxs_coords_x[i], verxs_coords_y[i]));
             }
 
             QVector<int> verxs_text_binding;
@@ -248,20 +248,20 @@ void CSamFrame::openFile() {
             else stop = true;
 
             // Тексты
-            QVector<int> txts_coords_x;
-            QVector<int> txts_coords_y;
+            QVector<double> txts_coords_x;
+            QVector<double> txts_coords_y;
             if (jsonObj.contains("txts_coords_x")) {
-                txts_coords_x = fromIntJsonToVector(jsonObj["txts_coords_x"].toArray());
+                txts_coords_x = fromDoubleJsonToVector(jsonObj["txts_coords_x"].toArray());
             }
             else stop = true;
             if (jsonObj.contains("txts_coords_y")) {
-                txts_coords_y = fromIntJsonToVector(jsonObj["txts_coords_y"].toArray());
+                txts_coords_y = fromDoubleJsonToVector(jsonObj["txts_coords_y"].toArray());
             }
             else stop = true;
 
-            QVector<QPoint> txts_coords;
+            QVector<QPointF> txts_coords;
             for (int i = 0; i < (int)txts_coords_x.size(); i++) {
-                txts_coords.push_back(QPoint(txts_coords_x[i], txts_coords_y[i]));
+                txts_coords.push_back(QPointF(txts_coords_x[i], txts_coords_y[i]));
             }
 
             QVector<int> txts_binding;
@@ -687,6 +687,14 @@ QVector<int> fromIntJsonToVector(QJsonArray arr) {
     QVector<int> result;
     for (int i = 0; i < (int)arr.size(); i++) {
         result.push_back(arr[i].toInt());
+    }
+    return result;
+}
+
+QVector<double> fromDoubleJsonToVector(QJsonArray arr) {
+    QVector<double> result;
+    for (int i = 0; i < (int)arr.size(); i++) {
+        result.push_back(arr[i].toDouble());
     }
     return result;
 }

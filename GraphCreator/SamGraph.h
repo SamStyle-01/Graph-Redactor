@@ -11,11 +11,11 @@ enum class TypeEdge {
 struct Text;
 
 struct Vertex {
-    Vertex() : coords(QPoint(0, 0)), radius(0), idx(-1), textBinding(-1) {}
-    Vertex(QPoint coords, int radius, int idx) : coords(coords), radius(radius), idx(idx), textBinding(-1) {}
+    Vertex() : coords(QPointF(0, 0)), radius(0), idx(-1), textBinding(-1) {}
+    Vertex(QPointF coords, int radius, int idx) : coords(coords), radius(radius), idx(idx), textBinding(-1) {}
     void setText(int textBinding);
 
-    QPoint coords;
+    QPointF coords;
     int radius;
     int idx;
     int textBinding;
@@ -39,10 +39,10 @@ struct SelfEdge {
 };
 
 struct Text {
-    Text(QString text, QPoint coords, int idx, bool notLine, int binding = -1, TypeEdge type = TypeEdge::NONE)
+    Text(QString text, QPointF coords, int idx, bool notLine, int binding = -1, TypeEdge type = TypeEdge::NONE)
         : text(text), coords(coords), idx(idx), binding(binding), notLine(notLine), type(type) {}
     QString text;
-    QPoint coords;
+    QPointF coords;
     int idx;
     int binding;
     bool notLine;
